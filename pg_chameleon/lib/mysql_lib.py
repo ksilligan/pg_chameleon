@@ -17,7 +17,7 @@ class mysql_source(object):
             Class constructor, the method sets the class variables and configure the
             operating parameters from the args provided t the class.
         """
-        self.statement_skip = ['BEGIN', 'COMMIT']
+        self.statement_skip = ['BEGIN', 'COMMIT', 'SAVEPOINT']
         self.schema_tables = {}
         self.schema_mappings = {}
         self.schema_loading = {}
