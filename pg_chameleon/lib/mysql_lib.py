@@ -1324,6 +1324,7 @@ class mysql_source(object):
                     schema_query = binlogevent.schema.decode()
                 except:
                     schema_query = binlogevent.schema
+
                 if not binlogevent.query.strip().upper().startswith(self.statement_skip) and schema_query in self.schema_mappings:
                     close_batch=True
                     destination_schema = self.schema_mappings[schema_query]
