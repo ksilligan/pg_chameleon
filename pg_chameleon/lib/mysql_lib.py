@@ -884,6 +884,7 @@ class mysql_source(object):
         self.skip_tables = self.source_config["skip_tables"]
         self.replica_batch_size = self.source_config["replica_batch_size"]
         self.sleep_loop = self.source_config["sleep_loop"]
+        self.skip_ddl = self.source_config["skip_ddl"] if "skip_ddl" in self.source_config else False
         self.postgis_present = self.pg_engine.check_postgis()
         if self.postgis_present:
             self.hexify = self.hexify_always
@@ -1325,7 +1326,7 @@ class mysql_source(object):
                 except:
                     schema_query = binlogevent.schema
 
-                if not binlogevent.query.strip().upper().startswith(self.statement_skip) and schema_query in self.schema_mappings:
+                if not binlogevent.query.strip().upper().startswith(self.statement_skip) and schema_query in self.schema_mappings and not self.skip_ddl:
                     close_batch=True
                     destination_schema = self.schema_mappings[schema_query]
                     log_position = binlogevent.packet.log_pos
