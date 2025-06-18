@@ -4,14 +4,11 @@ from prometheus_client import (
     generate_latest,
     CONTENT_TYPE_LATEST,
 )
-from pprint import pprint
 from http.server import HTTPServer, BaseHTTPRequestHandler,ThreadingHTTPServer
 
 import os
 import shutil
 import threading
-import datetime
-from time import sleep
 
 
 prome_stats=os.environ.get('PROMETHEUS_MULTIPROC_DIR')

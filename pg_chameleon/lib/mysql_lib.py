@@ -9,10 +9,8 @@ from pymysqlreplication import BinLogStreamReader
 from pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent,XidEvent
 from pymysqlreplication.row_event import DeleteRowsEvent,UpdateRowsEvent,WriteRowsEvent
 from pymysqlreplication.event import RotateEvent
-from pg_chameleon import sql_token
+from pg_chameleon import sql_token,set_metrics
 from os import remove
-
-from pg_chameleon.metrics.prometheus import set_metrics
 
 class mysql_source(object):
     def __init__(self):

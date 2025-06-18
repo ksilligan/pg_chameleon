@@ -16,7 +16,7 @@ import multiprocessing as mp
 import traceback
 from pkg_resources import get_distribution
 
-from pg_chameleon.metrics.prometheus import start_prometheus_server
+from pg_chameleon import start_prometheus_server
 
 class rollbar_notifier(object):
     """

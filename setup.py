@@ -41,7 +41,8 @@ setuptools.setup(
         "pg_chameleon.lib.global_lib",
         "pg_chameleon.lib.mysql_lib",
         "pg_chameleon.lib.pg_lib",
-        "pg_chameleon.lib.sql_util"
+        "pg_chameleon.lib.sql_util",
+        "pg_chameleon.metrics.prometheus"
     ],
     scripts=[
         "scripts/chameleon.py",
