@@ -21,7 +21,6 @@ os.mkdir(prome_stats)
 
 registry = CollectorRegistry()
 multiprocess.MultiProcessCollector(registry)
-
 _metrics_gauges: dict[str, Gauge] = {}
 def set_metrics(metrics):
     for key, value in metrics.items():
@@ -34,10 +33,11 @@ def set_metrics(metrics):
                 "pg_chameleon_" + key,
                 f"Metric {key}",
                 multiprocess_mode="max",
+                labelnames=["app"],
                 registry=registry
             )
             _metrics_gauges[key] = gauge
-        gauge.set(value)
+        gauge.labels(app="pg_chameleon").set(value)
 
 class MetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
