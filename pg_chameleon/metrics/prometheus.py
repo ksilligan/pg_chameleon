@@ -51,7 +51,7 @@ class MetricsHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
 def start_prometheus_server():
-    server = ThreadingHTTPServer(("127.0.0.1", 8000), MetricsHandler)
+    server = ThreadingHTTPServer(("0.0.0.0", 8000), MetricsHandler)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
     server_thread.start()
