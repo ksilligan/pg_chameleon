@@ -12,6 +12,8 @@ from pymysqlreplication.event import RotateEvent
 from pg_chameleon import sql_token
 from os import remove
 
+from pg_chameleon.metrics.prometheus import set_metrics
+
 class mysql_source(object):
     def __init__(self):
         """
@@ -1299,6 +1301,7 @@ class mysql_source(object):
 
             elif isinstance(binlogevent, XidEvent):
                 xid = binlogevent.xid
+                set_metrics({"xid": xid})
                 master_data["Xid"] = xid
                 self.logger.info("XID EVENT - binlogfile %s, position %s, xid %s" % (log_file, log_position, xid))
 
@@ -1388,7 +1391,8 @@ class mysql_source(object):
                     my_stream.close()
                     return [master_data, close_batch]
             else:
-
+                set_metrics({'latest_event_timestamp': binlogevent.timestamp})
+                set_metrics({'binlog_position': binlogevent.packet.log_pos})
                 for row in binlogevent.rows:
                     event_after={}
                     event_before={}

@@ -15,6 +15,9 @@ from daemonize import Daemonize
 import multiprocessing as mp
 import traceback
 from pkg_resources import get_distribution
+
+from pg_chameleon.metrics.prometheus import start_prometheus_server
+
 class rollbar_notifier(object):
     """
         This class is used to send messages to rollbar whether the key and environment variables are set
@@ -665,6 +668,9 @@ class replica_engine(object):
                 self.logger.info("Cleaning not processed batches for source %s" % (self.args.source))
                 self.pg_engine.clean_not_processed_batches()
                 self.pg_engine.disconnect_db()
+
+                start_prometheus_server()
+
                 if self.args.debug:
                     self.__run_replica()
                 else:
