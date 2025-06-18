@@ -1,16 +1,17 @@
 import time
 import sys
 import io
+
 import pymysql
 import codecs
 import binascii
 from pymysqlreplication import BinLogStreamReader
-from pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent
+from pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent,XidEvent
 from pymysqlreplication.row_event import DeleteRowsEvent,UpdateRowsEvent,WriteRowsEvent
 from pymysqlreplication.event import RotateEvent
 from pg_chameleon import sql_token
 from os import remove
-import re
+
 class mysql_source(object):
     def __init__(self):
         """
@@ -1274,7 +1275,7 @@ class mysql_source(object):
         my_stream = BinLogStreamReader(
             connection_settings = self.replica_conn,
             server_id = self.my_server_id,
-            only_events = [RotateEvent, DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent, QueryEvent, GtidEvent, HeartbeatLogEvent],
+            only_events = [RotateEvent, DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent, QueryEvent, GtidEvent, HeartbeatLogEvent, XidEvent],
             log_file = log_file,
             log_pos = log_position,
             auto_position = gtid_set,
@@ -1295,6 +1296,11 @@ class mysql_source(object):
                 gtid  = binlogevent.gtid.split(':')
                 next_gtid[gtid [0]]  = gtid [1]
                 master_data["gtid"] = next_gtid
+
+            if isinstance(binlogevent, XidEvent):
+                xid = binlogevent.xid
+                master_data["Xid"] = xid
+                self.logger.info("XID EVENT - binlogfile %s, position %s, xid %s" % (log_file, log_position, xid))
 
             elif isinstance(binlogevent, RotateEvent):
                 event_time = binlogevent.timestamp

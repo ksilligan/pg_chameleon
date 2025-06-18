@@ -92,6 +92,7 @@ CREATE TABLE sch_chameleon.t_replica_batch
   v_log_table character varying NOT NULL DEFAULT 't_log_replica',
   i_binlog_position bigint,
   t_gtid_set text,
+  t_xid text,
   b_started boolean NOT NULL DEFAULT False,
   b_processed boolean NOT NULL DEFAULT False,
   b_replayed boolean NOT NULL DEFAULT False,
