@@ -1297,7 +1297,7 @@ class mysql_source(object):
                 next_gtid[gtid [0]]  = gtid [1]
                 master_data["gtid"] = next_gtid
 
-            if isinstance(binlogevent, XidEvent):
+            elif isinstance(binlogevent, XidEvent):
                 xid = binlogevent.xid
                 master_data["Xid"] = xid
                 self.logger.info("XID EVENT - binlogfile %s, position %s, xid %s" % (log_file, log_position, xid))
