@@ -10,11 +10,6 @@ import os
 import shutil
 import threading
 
-
-prome_stats=os.environ.get('PROMETHEUS_MULTIPROC_DIR')
-if not prome_stats:
-    raise RuntimeError('Environment variable PROMETHEUS_MULTIPROC_DIR is not set. Please set it to the directory where you want to store Prometheus metrics.')
-
 registry = CollectorRegistry()
 multiprocess.MultiProcessCollector(registry)
 _metrics_gauges: dict[str, Gauge] = {}
@@ -47,10 +42,13 @@ class MetricsHandler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
 def start_prometheus_server():
+    prome_stats=os.environ.get('PROMETHEUS_MULTIPROC_DIR')
+    if not prome_stats:
+        raise RuntimeError('Environment variable PROMETHEUS_MULTIPROC_DIR is not set. Please set it to the directory where you want to store Prometheus metrics.')
+
     if os.path.exists(prome_stats):
         shutil.rmtree(prome_stats)
     os.mkdir(prome_stats)
-
     server = ThreadingHTTPServer(("0.0.0.0", 8000), MetricsHandler)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.daemon = True
