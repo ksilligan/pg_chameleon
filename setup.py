@@ -41,7 +41,8 @@ setuptools.setup(
         "pg_chameleon.lib.global_lib",
         "pg_chameleon.lib.mysql_lib",
         "pg_chameleon.lib.pg_lib",
-        "pg_chameleon.lib.sql_util"
+        "pg_chameleon.lib.sql_util",
+        "pg_chameleon.metrics.prometheus"
     ],
     scripts=[
         "scripts/chameleon.py",
@@ -56,7 +57,8 @@ setuptools.setup(
         'daemonize>=2.4.7',
         'rollbar>=0.13.17',
         'parsy>=2.1',
-        'Sphinx>=7.4.7'
+        'Sphinx>=7.4.7',
+        'prometheus-client>=0.22.1'
 
     ],
     include_package_data = True,

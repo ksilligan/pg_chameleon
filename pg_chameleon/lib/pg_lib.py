@@ -3478,6 +3478,11 @@ class pg_engine(object):
         binlog_name = master_data["File"]
         binlog_position = master_data["Position"]
         log_table = self.swap_source_log_table()
+        if "Xid" in master_data:
+            executed_xid = master_data["Xid"]
+        else:
+            executed_xid = None
+
         if "Executed_Gtid_Set" in master_data:
             executed_gtid_set = master_data["Executed_Gtid_Set"]
         else:
@@ -3494,10 +3499,12 @@ class pg_engine(object):
                     t_binlog_name,
                     i_binlog_position,
                     t_gtid_set,
+                    t_xid,
                     v_log_table
                 )
             VALUES
                 (
+                    %s,
                     %s,
                     %s,
                     %s,
@@ -3520,7 +3527,7 @@ class pg_engine(object):
         """
 
         try:
-            self.pgsql_cur.execute(sql_master, (self.i_id_source, binlog_name, binlog_position, executed_gtid_set, log_table))
+            self.pgsql_cur.execute(sql_master, (self.i_id_source, binlog_name, binlog_position, executed_gtid_set, executed_xid ,log_table))
             results =self.pgsql_cur.fetchone()
             next_batch_id=results[0]
             self.pgsql_cur.execute(sql_last_update, (event_time, self.i_id_source, ))

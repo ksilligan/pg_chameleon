@@ -1,16 +1,17 @@
 import time
 import sys
 import io
+
 import pymysql
 import codecs
 import binascii
 from pymysqlreplication import BinLogStreamReader
-from pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent
+from pymysqlreplication.event import QueryEvent, GtidEvent, HeartbeatLogEvent,XidEvent
 from pymysqlreplication.row_event import DeleteRowsEvent,UpdateRowsEvent,WriteRowsEvent
 from pymysqlreplication.event import RotateEvent
-from pg_chameleon import sql_token
+from pg_chameleon import sql_token,set_metrics
 from os import remove
-import re
+
 class mysql_source(object):
     def __init__(self):
         """
@@ -884,6 +885,7 @@ class mysql_source(object):
         self.skip_tables = self.source_config["skip_tables"]
         self.replica_batch_size = self.source_config["replica_batch_size"]
         self.sleep_loop = self.source_config["sleep_loop"]
+        self.skip_ddl = self.source_config["skip_ddl"] if "skip_ddl" in self.source_config else False
         self.postgis_present = self.pg_engine.check_postgis()
         if self.postgis_present:
             self.hexify = self.hexify_always
@@ -1273,7 +1275,7 @@ class mysql_source(object):
         my_stream = BinLogStreamReader(
             connection_settings = self.replica_conn,
             server_id = self.my_server_id,
-            only_events = [RotateEvent, DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent, QueryEvent, GtidEvent, HeartbeatLogEvent],
+            only_events = [RotateEvent, DeleteRowsEvent, WriteRowsEvent, UpdateRowsEvent, QueryEvent, GtidEvent, HeartbeatLogEvent, XidEvent],
             log_file = log_file,
             log_pos = log_position,
             auto_position = gtid_set,
@@ -1294,6 +1296,12 @@ class mysql_source(object):
                 gtid  = binlogevent.gtid.split(':')
                 next_gtid[gtid [0]]  = gtid [1]
                 master_data["gtid"] = next_gtid
+
+            elif isinstance(binlogevent, XidEvent):
+                xid = binlogevent.xid
+                set_metrics({"xid": xid})
+                master_data["Xid"] = xid
+                self.logger.info("XID EVENT - binlogfile %s, position %s, xid %s" % (log_file, log_position, xid))
 
             elif isinstance(binlogevent, RotateEvent):
                 event_time = binlogevent.timestamp
@@ -1325,7 +1333,7 @@ class mysql_source(object):
                 except:
                     schema_query = binlogevent.schema
 
-                if not binlogevent.query.strip().upper().startswith(self.statement_skip) and schema_query in self.schema_mappings:
+                if not binlogevent.query.strip().upper().startswith(self.statement_skip) and schema_query in self.schema_mappings and not self.skip_ddl:
                     close_batch=True
                     destination_schema = self.schema_mappings[schema_query]
                     log_position = binlogevent.packet.log_pos
@@ -1381,7 +1389,8 @@ class mysql_source(object):
                     my_stream.close()
                     return [master_data, close_batch]
             else:
-
+                set_metrics({'latest_event_timestamp': binlogevent.timestamp})
+                set_metrics({'binlog_position': binlogevent.packet.log_pos})
                 for row in binlogevent.rows:
                     event_after={}
                     event_before={}
